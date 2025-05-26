@@ -1,25 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-
-interface SignupFormData {
-  firstName: string;
-  lastName: string;
+interface SignInFormData {
   email: string;
   password: string;
-  phoneNumber: string;
 }
 
-function Auth() {
-  const [formData, setFormData] = useState<SignupFormData>({
-    firstName: '',
-    lastName: '',
+function SignIn() {
+  const [formData, setFormData] = useState<SignInFormData>({
     email: '',
-    password: '',
-    phoneNumber: ''
+    password: ''
   });
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,7 +31,7 @@ function Auth() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3200/users/signup', {
+      const response = await fetch('http://localhost:3200/users/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,14 +42,38 @@ function Auth() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'An error occurred during signup');
+        throw new Error(data.message || 'An error occurred during sign in');
       }
 
-      // Handle successful signup
+      // Handle successful sign in
       localStorage.setItem('token', data.token);
-      // Redirect or update UI state
+      
+      // Show success message
+      toast.success(`Welcome back, ${data.user.firstName}!`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+      // Add a slight delay before navigation to show the toast
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+
     } catch (err: any) {
-      setError(err.message || 'An error occurred during signup');
+      setError(err.message || 'An error occurred during sign in');
+      // Show error toast
+      toast.error(err.message || 'An error occurred during sign in', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -61,6 +81,20 @@ function Auth() {
 
   return (
     <div className="flex min-h-screen">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#1E293B] items-center justify-center">
         <div className="text-center">
@@ -69,10 +103,10 @@ function Auth() {
         </div>
       </div>
 
-      {/* Right side - Signup Form */}
+      {/* Right side - Sign In Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-6">Create Account</h2>
+          <h2 className="text-2xl font-bold mb-6">Sign In</h2>
           
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -81,49 +115,12 @@ function Auth() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={formData.phoneNumber}
                 onChange={handleChange}
                 required
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -138,9 +135,28 @@ function Auth() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                minLength={8}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                  Remember me
+                </label>
+              </div>
+
+              <div className="text-sm">
+                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                  Forgot your password?
+                </a>
+              </div>
             </div>
 
             <button
@@ -148,15 +164,14 @@ function Auth() {
               disabled={loading}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
-            
           </form>
 
           <p className="mt-4 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <a href="/signin" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign in
+            Don't have an account?{' '}
+            <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+              Sign up
             </a>
           </p>
         </div>
@@ -165,5 +180,4 @@ function Auth() {
   );
 }
 
-
-export {Auth}
+export { SignIn };

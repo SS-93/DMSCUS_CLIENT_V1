@@ -1,26 +1,38 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import {BrowserRouter, Routes, Route,  } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import Login from './components/auth/Login';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import Home from './components/Home';
+import { SignIn } from './components/auth/SignIn';
+import GoogleAuthUI from './components/googleAuth/GoogleAuthUI';
+// import AuthCallback from './components/auth/AuthCallback';s
 
+const Dashboard = () => <div>Dashboard (Coming Soon)</div>;
 
 function App() {
   return (
-    <div>
-      <BrowserRouter>
+    <AuthProvider>
+      <Router>
         <Routes>
-          <Route path="/" element={<Home />} />   
-          {/* <Route path="/login" element={<Login />} /> */}
-          {/* <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/logout" element={<Logout />} /> */}
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/signup" element={<Home />} />   
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/test" element={<GoogleAuthUI />} />
+          {/* <Route path="/auth/callback" element={<AuthCallback />} /> */}
         </Routes>
-      </BrowserRouter>
-    </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
-export  {App};
+export  default App;
