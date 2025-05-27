@@ -6,6 +6,8 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import Home from './components/Home';
 import { SignIn } from './components/auth/SignIn';
 import GoogleAuthUI from './components/googleAuth/GoogleAuthUI';
+import DriveLogin from './components/drive/DriveLogin';
+import DriveDashboard from './components/drive/DriveDashboard';
 // import AuthCallback from './components/auth/AuthCallback';s
 
 const Dashboard = () => <div>Dashboard (Coming Soon)</div>;
@@ -21,6 +23,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/drive-login"
+            element={
+              <ProtectedRoute>
+                <DriveLogin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/drive-dashboard"
+            element={
+              <ProtectedRoute>
+                <DriveDashboard />
               </ProtectedRoute>
             }
           />
